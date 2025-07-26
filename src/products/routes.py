@@ -2,15 +2,20 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.database import get_async_session
+from websockets import route
+from src.core.database import get_async_session
 from src.products.models import Product
 from src.products.schemas import (
     ProductCreateSchema,
     ProductResponseSchema,
     ProductUpdateSchema,
 )
+from src.products.services import ProductService
 
 routes = APIRouter()
+
+# routes(FastAPI) -> services -> dao(Database Access Object)
+#                             -> MongoDB Access Object
 
 
 @routes.get("/products")
@@ -18,8 +23,9 @@ async def get_products(
     session: AsyncSession = Depends(get_async_session),
 ) -> List[ProductResponseSchema]:
     """Fetch all products."""
-    result = await session.execute(select(Product))
-    return list(result.scalars().all())
+    service = ProductService(session)
+    products = await service.get_all_products()
+    return products
 
 
 @routes.post("/products")
@@ -28,11 +34,11 @@ async def create_product(
     session: AsyncSession = Depends(get_async_session),
 ) -> ProductResponseSchema:
     """Create a new product."""
-    new_product = Product(**product.model_dump())
-    session.add(new_product)
-    await session.commit()
-    await session.refresh(new_product)
-    return new_product
+    try:
+        service = ProductService(session)
+        return await service.create_product(product)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @routes.get("/products/{product_id}", response_model=ProductResponseSchema)
@@ -41,11 +47,11 @@ async def get_product(
     session: AsyncSession = Depends(get_async_session),
 ) -> ProductResponseSchema:
     """Fetch a product by ID."""
-    result = await session.execute(select(Product).where(Product.id == product_id))
-    product = result.scalar_one_or_none()
-    if not product:
+    try:
+        service = ProductService(session)
+        return await service.get_product_by_id(product_id)
+    except ValueError:
         raise HTTPException(status_code=404, detail="Product not found")
-    return product
 
 
 @routes.put("/products/{product_id}")
@@ -55,18 +61,11 @@ async def update_product(
     session: AsyncSession = Depends(get_async_session),
 ) -> ProductResponseSchema:
     """Update an existing product."""
-    result = await session.execute(select(Product).where(Product.id == product_id))
-    existing_product = result.scalar_one_or_none()
-
-    if not existing_product:
+    try:
+        service = ProductService(session)
+        return await service.update_product(product_id, product)
+    except ValueError:
         raise HTTPException(status_code=404, detail="Product not found")
-
-    for key, value in product.model_dump().items():
-        setattr(existing_product, key, value)
-
-    await session.commit()
-    await session.refresh(existing_product)
-    return existing_product
 
 
 @routes.delete("/products/{product_id}")
@@ -75,12 +74,8 @@ async def delete_product(
     session: AsyncSession = Depends(get_async_session),
 ) -> dict:
     """Delete a product by ID."""
-    result = await session.execute(select(Product).where(Product.id == product_id))
-    product = result.scalar_one_or_none()
-
-    if not product:
+    try:
+        service = ProductService(session)
+        return await service.delete_product(product_id)
+    except ValueError:
         raise HTTPException(status_code=404, detail="Product not found")
-
-    await session.delete(product)
-    await session.commit()
-    return {"detail": "Product deleted successfully"}

@@ -14,6 +14,12 @@ class ProductSchema(BaseModel):
     image: str | None = Field(None, max_length=255)
     category_id: int = Field(..., gt=0)
 
+    model_config = {
+        "from_attributes": True,
+    }
+
+    # values['title'] -> values.title
+
 
 class ProductCreateSchema(ProductSchema): ...
 
