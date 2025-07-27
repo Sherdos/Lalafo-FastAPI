@@ -1,10 +1,9 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from websockets import route
+
 from src.core.database import get_async_session
-from src.products.models import Product
 from src.products.schemas import (
     ProductCreateSchema,
     ProductResponseSchema,

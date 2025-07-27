@@ -7,3 +7,9 @@
 - `pip install -r requirements.txt`
 - `alembic upgrade head`
 - `uvicorn src.main:app --reload`
+
+## Run via Docker
+
+Ensure that in your pc installed docker
+
+- `docker-compose up --build`
