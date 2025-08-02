@@ -18,13 +18,19 @@ class BaseDAO(Generic[T]):
         """Fetch all records."""
         stmt = select(self.model)
         result = await self.session.execute(stmt)
-        return list(result.scalars().all())
+        return list(result.unique().scalars().all())
 
     async def find_one_or_none_by_id(self, id: int) -> T | None:
         """Fetch a record by its ID."""
         stmt = select(self.model).where(self.model.id == id)
         result = await self.session.execute(stmt)
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
+
+    async def find_one_or_none(self, **kwargs) -> T | None:
+        """Fetch a record by specific attributes."""
+        stmt = select(self.model).filter_by(**kwargs)
+        result = await self.session.execute(stmt)
+        return result.unique().scalar_one_or_none()
 
     async def create(self, values: BaseModel) -> T:
         """Create a new record."""
@@ -39,7 +45,8 @@ class BaseDAO(Generic[T]):
         obj = await self.find_one_or_none_by_id(id)
 
         for key, value in values.model_dump().items():
-            setattr(obj, key, value)
+            if value is not None:
+                setattr(obj, key, value)
 
         await self.session.commit()
         await self.session.refresh(obj)
