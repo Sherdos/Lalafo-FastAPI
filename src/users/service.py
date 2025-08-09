@@ -3,6 +3,10 @@ from email.policy import HTTP
 from fastapi import HTTPException
 from src.users.dao import UserDAO
 from sqlalchemy.ext.asyncio import AsyncSession
+from passlib.hash import pbkdf2_sha256
+
+
+# from src.core.dao import BaseDAO
 
 
 class UserService:
@@ -17,6 +21,8 @@ class UserService:
 
     async def create_user(self, user_data):
         """Create a new user."""
+        hashed_password = pbkdf2_sha256.hash(user_data.password)
+        user_data.password = hashed_password
         return await self.user_dao.create(user_data)
 
     async def update_user(self, user_id: int, user_data):
@@ -30,6 +36,6 @@ class UserService:
     async def authenticate_user(self, user_data):
         """Authenticate a user."""
         user = await self.get_user_by_email(user_data.email)
-        if not user or not user.password == user_data.password:
+        if not user or not pbkdf2_sha256.verify(user_data.password, user.password):
             raise HTTPException(status_code=401, detail="Invalid credentials")
         return user

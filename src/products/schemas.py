@@ -25,12 +25,12 @@ class ProductSchema(BaseModel):
     # values['title'] -> values.title
 
 
-class ProductCreateSchema(ProductSchema): ...
-
-
-class ProductCreateInputSchema(ProductSchema):
-    user_id: int = Field(..., gt=0)
+class ProductCreateSchema(ProductSchema):
     category_id: int = Field(..., gt=0)
+
+
+class ProductCreateInputSchema(ProductCreateSchema):
+    user_id: int = Field(..., gt=0)
 
 
 class ProductUpdateSchema(BaseModel):
