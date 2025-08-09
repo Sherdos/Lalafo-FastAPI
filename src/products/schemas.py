@@ -1,10 +1,15 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 
+from src.users.schemas import UserResponse
+
 
 class CategorySchema(BaseModel):
     id: int
     name: str
+    model_config = {
+        "from_attributes": True,
+    }
 
 
 class ProductSchema(BaseModel):
@@ -12,7 +17,6 @@ class ProductSchema(BaseModel):
     description: str | None = Field(None, max_length=255)
     price: float = Field(..., gt=0)
     image: str | None = Field(None, max_length=255)
-    category_id: int = Field(..., gt=0)
 
     model_config = {
         "from_attributes": True,
@@ -24,6 +28,11 @@ class ProductSchema(BaseModel):
 class ProductCreateSchema(ProductSchema): ...
 
 
+class ProductCreateInputSchema(ProductSchema):
+    user_id: int = Field(..., gt=0)
+    category_id: int = Field(..., gt=0)
+
+
 class ProductUpdateSchema(BaseModel):
     name: Optional[str] = Field(None, max_length=100)
     description: Optional[str] = Field(None, max_length=255)
@@ -33,3 +42,12 @@ class ProductUpdateSchema(BaseModel):
 
 class ProductResponseSchema(ProductSchema):
     id: int
+    user: UserResponse
+    category: CategorySchema
+
+    model_config = {
+        "from_attributes": True,
+    }
+
+
+ProductResponseSchema.model_rebuild()

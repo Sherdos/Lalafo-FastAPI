@@ -5,11 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_async_session
 from src.products.schemas import (
+    ProductCreateInputSchema,
     ProductCreateSchema,
     ProductResponseSchema,
     ProductUpdateSchema,
 )
 from src.products.services import ProductService
+from src.users.auth import get_current_user
+from src.users.models import User
 
 routes = APIRouter()
 
@@ -31,11 +34,15 @@ async def get_products(
 async def create_product(
     product: ProductCreateSchema,
     session: AsyncSession = Depends(get_async_session),
+    user_data: User = Depends(get_current_user),
 ) -> ProductResponseSchema:
     """Create a new product."""
     try:
         service = ProductService(session)
-        return await service.create_product(product)
+        model = ProductCreateInputSchema.model_validate(
+            {**product.model_dump(), "user_id": user_data.id}
+        )
+        return await service.create_product(model)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

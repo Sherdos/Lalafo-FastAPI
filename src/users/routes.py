@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends
 
+from src.users.auth import create_access_token, get_current_user
+from src.users.models import User
 from src.users.schemas import UserCreate, UserLoginAndRegister, UserResponse
 from src.users.service import UserService
 
@@ -39,16 +41,20 @@ async def register_user(
     return new_user
 
 
-@routes.post("/login")
+@routes.post("/auth/token")
 async def login_user(
-    user: UserLoginAndRegister, session: AsyncSession = Depends(get_async_session)
+    user_data: UserLoginAndRegister, session: AsyncSession = Depends(get_async_session)
 ):
     """Login an existing user."""
 
     service = UserService(session)
-    logged_in_user = await service.get_user_by_email(user.email)
+    user = await service.authenticate_user(user_data)
+    token = create_access_token(user.id)
 
-    if not logged_in_user:
-        raise HTTPException(status_code=400, detail="User login failed")
+    return {"access_token": token}
 
-    return logged_in_user
+
+@routes.get("/me", response_model=UserResponse)
+async def get_me(current_user: User = Depends(get_current_user)):
+    """Get the current user."""
+    return current_user

@@ -1,3 +1,6 @@
+from email.policy import HTTP
+
+from fastapi import HTTPException
 from src.users.dao import UserDAO
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,3 +26,10 @@ class UserService:
     async def get_user_by_email(self, email: str):
         """Fetch a user by email."""
         return await self.user_dao.find_one_or_none(email=email)
+
+    async def authenticate_user(self, user_data):
+        """Authenticate a user."""
+        user = await self.get_user_by_email(user_data.email)
+        if not user or not user.password == user_data.password:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        return user

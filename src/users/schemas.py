@@ -7,6 +7,8 @@ class UserBase(BaseModel):
     email: str
     is_superuser: bool = False
 
+    model_config = {"from_attributes": True}
+
 
 class UserCreate(UserBase):
     """Schema for creating a new user."""
@@ -30,5 +32,4 @@ class UserLoginAndRegister(BaseModel):
 
     email: str
     password: str
-
     model_config = {"from_attributes": True}

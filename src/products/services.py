@@ -3,10 +3,12 @@ from src.products.repositories import ProductDAO
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.products.schemas import (
+    ProductCreateInputSchema,
     ProductCreateSchema,
     ProductResponseSchema,
     ProductUpdateSchema,
 )
+from src.users.models import User
 
 
 class ProductService:
@@ -21,7 +23,7 @@ class ProductService:
         return [ProductResponseSchema.model_validate(product) for product in products]
 
     async def create_product(
-        self, product_data: ProductCreateSchema
+        self, product_data: ProductCreateInputSchema
     ) -> ProductResponseSchema:
         """Create a new product."""
         try:
