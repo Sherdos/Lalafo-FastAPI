@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_async_session
+from src.products.deps import get_current_user_and_check_owner
 from src.products.schemas import (
     ProductCreateInputSchema,
     ProductCreateSchema,
@@ -65,6 +66,7 @@ async def update_product(
     product_id: int,
     product: ProductUpdateSchema,
     session: AsyncSession = Depends(get_async_session),
+    user_data: User = Depends(get_current_user_and_check_owner),
 ) -> ProductResponseSchema:
     """Update an existing product."""
     try:
@@ -78,6 +80,7 @@ async def update_product(
 async def delete_product(
     product_id: int,
     session: AsyncSession = Depends(get_async_session),
+    user_data: User = Depends(get_current_user_and_check_owner),
 ) -> dict:
     """Delete a product by ID."""
     try:

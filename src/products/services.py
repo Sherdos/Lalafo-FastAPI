@@ -10,6 +10,8 @@ from src.products.schemas import (
 )
 from src.users.models import User
 
+# View -> Controller -> Models
+
 
 class ProductService:
     """Service for managing products."""
