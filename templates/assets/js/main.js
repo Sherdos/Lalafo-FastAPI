@@ -1,3 +1,4 @@
+const ROOT_URL = "http://localhost:8000/";
 const ROOT_API_URL = "http://localhost:8000/api/v1";
 
 async function fetchData() {
@@ -15,7 +16,7 @@ async function init() {
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       ${products.map(product => `
         <div class="bg-white rounded-2xl shadow p-4 flex flex-col">
-          <img src="https://via.placeholder.com/300" class="w-full h-40 object-cover rounded-xl mb-4" />
+          <img src="${ROOT_URL}${product.image}" class="w-full h-40 object-cover rounded-xl mb-4" />
           <h2 class="text-lg font-medium mb-1">${product.name}</h2>
           <p class="text-sm text-gray-500 mb-4">${product.description}</p>
           <div class="mt-auto flex items-center justify-between">
