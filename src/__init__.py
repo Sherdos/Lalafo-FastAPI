@@ -34,5 +34,8 @@ def tree(categories):
 
 }
 
+cache(categories)
+12 часов
+
 
 """

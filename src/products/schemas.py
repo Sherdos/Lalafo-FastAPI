@@ -12,6 +12,11 @@ class CategorySchema(BaseModel):
     }
 
 
+class CategoryResponse(CategorySchema):
+    parent_id: int
+    children: "CategoryResponse"
+
+
 class ProductSchema(BaseModel):
     name: str = Field(..., max_length=100)
     description: str | None = Field(None, max_length=255)

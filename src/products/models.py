@@ -11,6 +11,16 @@ class Category(Base):
     products: Mapped[list["Product"]] = relationship(
         "Product", back_populates="category", lazy="joined"
     )
+    parent_id: Mapped[int] = mapped_column(
+        ForeignKey("categories.id", ondelete="CASCADE"), nullable=True
+    )
+    parent: Mapped["Category"] = relationship(
+        "Category",
+        back_populates="products",
+        foreign_keys=[parent_id],
+    )
+
+    childer: Mapped[list["Category"]] = relationship("Category", "parent")
 
 
 class Product(Base):
