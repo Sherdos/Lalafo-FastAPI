@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from src.products.routes import routes as products_routes
 from src.users.routes import routes as users_routes
 from src.image.routes import image_router
@@ -15,11 +16,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
 
 
 app.include_router(
@@ -42,3 +38,10 @@ app.include_router(
 
 
 app.mount("/media", StaticFiles(directory="media"), name="media")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+
+@app.get("/")
+async def read_root(request: Request):
+    return templates.TemplateResponse("pages/index.html", {"request": request})
