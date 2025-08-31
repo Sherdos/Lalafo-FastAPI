@@ -16,11 +16,13 @@ class Category(Base):
     )
     parent: Mapped["Category"] = relationship(
         "Category",
-        back_populates="products",
-        foreign_keys=[parent_id],
+        back_populates="childer",
+        remote_side="Category.id",
     )
 
-    childer: Mapped[list["Category"]] = relationship("Category", "parent")
+    childer: Mapped[list["Category"]] = relationship(
+        "Category", back_populates="parent"
+    )
 
 
 class Product(Base):
