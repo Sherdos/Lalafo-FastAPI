@@ -56,3 +56,6 @@ class ProductService:
         if not result:
             raise ValueError("Product not found")
         return result
+
+    async def get_tree(self):
+        return await self.product_dao.get_tree()

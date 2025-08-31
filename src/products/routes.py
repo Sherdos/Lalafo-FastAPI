@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.database import get_async_session
 from src.products.deps import get_current_user_and_check_owner
 from src.products.schemas import (
+    CategoryResponse,
     ProductCreateInputSchema,
     ProductCreateSchema,
     ProductResponseSchema,
@@ -88,3 +89,9 @@ async def delete_product(
         return await service.delete_product(product_id)
     except ValueError:
         raise HTTPException(status_code=404, detail="Product not found")
+
+
+@routes.get("/categories/tree", response_model=List[CategoryResponse])
+async def get_tree(session: AsyncSession = Depends(get_async_session)):
+    service = ProductService(session)
+    return await service.get_tree()

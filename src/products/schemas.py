@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from src.users.schemas import UserResponse
@@ -13,8 +13,8 @@ class CategorySchema(BaseModel):
 
 
 class CategoryResponse(CategorySchema):
-    parent_id: int
-    children: "CategoryResponse"
+    parent_id: int | None
+    childer: List["CategoryResponse"]
 
 
 class ProductSchema(BaseModel):
