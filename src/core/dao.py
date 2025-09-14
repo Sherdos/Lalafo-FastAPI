@@ -20,6 +20,12 @@ class BaseDAO(Generic[T]):
         result = await self.session.execute(stmt)
         return list(result.unique().scalars().all())
 
+    async def find_all_with_filters(self, **kwargs) -> list[T]:
+        """Fetch all records."""
+        stmt = select(self.model).filter_by(**kwargs)
+        result = await self.session.execute(stmt)
+        return list(result.unique().scalars().all())
+
     async def find_one_or_none_by_id(self, id: int) -> T | None:
         """Fetch a record by its ID."""
         stmt = select(self.model).where(self.model.id == id)

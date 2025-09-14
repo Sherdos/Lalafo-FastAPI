@@ -7,8 +7,11 @@ from src.products.schemas import (
     ProductCreateSchema,
     ProductResponseSchema,
     ProductUpdateSchema,
+    Filters
 )
 from src.users.models import User
+from functools import lru_cache
+
 
 # View -> Controller -> Models
 
@@ -19,9 +22,15 @@ class ProductService:
     def __init__(self, session: AsyncSession):
         self.product_dao = ProductDAO(session)
 
-    async def get_all_products(self) -> List[ProductResponseSchema]:
+    async def get_all_products(self, filters:Filters) -> List[ProductResponseSchema]:
         """Fetch all products."""
-        products = await self.product_dao.find_all()
+        filters_diction = {
+            "category_id":filters.category_id if filters.category_id else None,
+            "name":filters.q if filters.q else None,
+        } 
+        products = await self.product_dao.find_all_with_filters(
+                **{k: v for k, v in filters_diction.items() if v is not None}
+            )
         return [ProductResponseSchema.model_validate(product) for product in products]
 
     async def create_product(
@@ -57,5 +66,6 @@ class ProductService:
             raise ValueError("Product not found")
         return result
 
+    @lru_cache()
     async def get_tree(self):
         return await self.product_dao.get_tree()

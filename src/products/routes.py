@@ -11,6 +11,7 @@ from src.products.schemas import (
     ProductCreateSchema,
     ProductResponseSchema,
     ProductUpdateSchema,
+    Filters
 )
 from src.products.services import ProductService
 from src.users.auth import get_current_user
@@ -22,13 +23,15 @@ routes = APIRouter()
 #                             -> MongoDB Access Object
 
 
-@routes.get("/products")
+@routes.post("/search/products")
 async def get_products(
-    session: AsyncSession = Depends(get_async_session),
+    filters: Filters,
+    session: AsyncSession = Depends(get_async_session), 
 ) -> List[ProductResponseSchema]:
     """Fetch all products."""
     service = ProductService(session)
-    products = await service.get_all_products()
+    products = await service.get_all_products(filters)
+
     return products
 
 

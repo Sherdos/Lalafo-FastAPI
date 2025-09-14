@@ -56,3 +56,9 @@ class ProductResponseSchema(ProductSchema):
 
 
 ProductResponseSchema.model_rebuild()
+
+
+class Filters(BaseModel):
+    q: str | None = Field(None)
+    category_id: int | None = Field(None)
+
